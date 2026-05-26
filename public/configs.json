@@ -1,0 +1,37 @@
+[
+  {
+    "ping": 746,
+    "config": "vless://f286118f-fce9-4cd6-85ce-5832180f2a66@snapp.ir:8080?path=%2F&security=none&encryption=none&host=kootahkon.ir&type=ws#%40filembad",
+    "channel": "filembad",
+    "protocol": "vless",
+    "tested_at": "2026-04-27T17:14:54.035531"
+  },
+  {
+    "ping": 932,
+    "config": "vless://f286118f-fce9-4cd6-85ce-5832180f2a66@snapp.ir:8080?path=%2F&security=none&encryption=none&host=kootahkon.ir&type=ws#",
+    "channel": "Blue_star_Vip",
+    "protocol": "vless",
+    "tested_at": "2026-04-27T17:15:17.927142"
+  },
+  {
+    "ping": 1303,
+    "config": "vless://355cbbae-10ac-4715-8790-c8dc57d7d9f6@185.143.233.235:80?path=%2F&security=none&encryption=none&host=vixon.portab.org&type=ws#%40configraygan",
+    "channel": "configraygan",
+    "protocol": "vless",
+    "tested_at": "2026-04-27T17:16:24.610136"
+  },
+  {
+    "ping": 1773,
+    "config": "vless://f286118f-fce9-4cd6-85ce-5832180f2a66@snapp.ir:8080?path=%2F&security=none&encryption=none&host=kootahkon.ir&type=ws#TEL%3BFather_vpn",
+    "channel": "persianvpnhub",
+    "protocol": "vless",
+    "tested_at": "2026-04-27T17:14:06.234807"
+  },
+  {
+    "ping": 4376,
+    "config": "vless://305b2c5b-97ed-49fb-a4f8-83785864fccd@2.144.23.147:53486?encryption=none&type=tcp&headerType=none#%40filembad",
+    "channel": "filembad",
+    "protocol": "vless",
+    "tested_at": "2026-04-27T17:15:42.785094"
+  }
+]
