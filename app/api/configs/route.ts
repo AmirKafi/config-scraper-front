@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getDatabase, getAllConfigs, clearAndInsertConfigs, Config } from '@/lib/db';
+import { getAllConfigs, clearAndInsertConfigs, Config } from '@/lib/db';
 
 interface ConfigRequest {
   ping: number;
@@ -7,13 +7,6 @@ interface ConfigRequest {
   channel: string;
   protocol?: string;
   tested_at?: string;
-}
-
-// راه‌اندازی دیتابیس
-try {
-  getDatabase();
-} catch (error) {
-  console.error('Database initialization error:', error);
 }
 
 export async function POST(request: NextRequest) {
@@ -41,7 +34,7 @@ export async function POST(request: NextRequest) {
       }));
 
       // حذف تمام داده‌های قدیمی و درج داده‌های جدید
-      clearAndInsertConfigs(processedConfigs);
+      await clearAndInsertConfigs(processedConfigs);
 
       return NextResponse.json(
         { 
@@ -79,7 +72,7 @@ export async function POST(request: NextRequest) {
 
 export async function GET() {
   try {
-    const configs = getAllConfigs();
+    const configs = await getAllConfigs();
     return NextResponse.json(configs, { status: 200 });
   } catch (error) {
     console.error('Failed to read configs:', error);

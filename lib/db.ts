@@ -1,22 +1,13 @@
-import Database from 'better-sqlite3';
-import { join } from 'path';
-import { mkdirSync } from 'fs';
+import { createClient } from '@supabase/supabase-js';
 
-const DB_FILE = join(process.cwd(), 'data', 'configs.db');
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
 
-let db: Database.Database;
-
-export function getDatabase() {
-  if (!db) {
-    // ایجاد دایرکتوری اگر وجود نداشته باشد
-    const dataDir = join(process.cwd(), 'data');
-    mkdirSync(dataDir, { recursive: true });
-    
-    db = new Database(DB_FILE);
-    initializeDatabase();
-  }
-  return db;
+if (!supabaseUrl || !supabaseKey) {
+  throw new Error('Missing Supabase environment variables');
 }
+
+const supabase = createClient(supabaseUrl, supabaseKey);
 
 export interface Config {
   id?: number;
@@ -25,43 +16,74 @@ export interface Config {
   channel: string;
   protocol: string;
   tested_at: string;
+  created_at?: string;
 }
 
-function initializeDatabase() {
-  const createTableQuery = `
-    CREATE TABLE IF NOT EXISTS configs (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      ping REAL NOT NULL,
-      config TEXT NOT NULL,
-      channel TEXT NOT NULL,
-      protocol TEXT NOT NULL,
-      tested_at TEXT NOT NULL,
-      created_at TEXT DEFAULT CURRENT_TIMESTAMP
-    )
-  `;
-
-  db.exec(createTableQuery);
+export async function getDatabase() {
+  // تابع برای سازگاری با کد قدیم
+  // در Supabase نیازی به initialize ندارید
+  return supabase;
 }
 
-export function clearAndInsertConfigs(configs: Config[]) {
-  const database = getDatabase();
-  const deleteQuery = database.prepare('DELETE FROM configs');
-  const insertQuery = database.prepare(
-    'INSERT INTO configs (ping, config, channel, protocol, tested_at) VALUES (?, ?, ?, ?, ?)'
+export async function initializeDatabase() {
+  // اگر جدول وجود نداشته باشد، می‌توانید آن را از Supabase Dashboard یا با CLI ایجاد کنید
+  // SQL برای ایجاد جدول:
+  /*
+  CREATE TABLE configs (
+    id BIGINT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+    ping REAL NOT NULL,
+    config TEXT NOT NULL,
+    channel TEXT NOT NULL,
+    protocol TEXT NOT NULL,
+    tested_at TEXT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
   );
-
-  const transaction = database.transaction(() => {
-    deleteQuery.run();
-    for (const config of configs) {
-      insertQuery.run(config.ping, config.config, config.channel, config.protocol, config.tested_at);
-    }
-  });
-
-  transaction();
+  */
+  console.log('Database is already initialized on Supabase');
 }
 
-export function getAllConfigs(): Config[] {
-  const database = getDatabase();
-  const query = database.prepare('SELECT id, ping, config, channel, protocol, tested_at FROM configs');
-  return query.all() as Config[];
+export async function clearAndInsertConfigs(configs: Config[]) {
+  try {
+    // حذف تمام داده‌های قدیمی
+    const { error: deleteError } = await supabase
+      .from('configs')
+      .delete()
+      .neq('id', 0);
+
+    if (deleteError) throw deleteError;
+
+    // درج داده‌های جدید
+    const { error: insertError, data } = await supabase
+      .from('configs')
+      .insert(
+        configs.map(config => ({
+          ping: config.ping,
+          config: config.config,
+          channel: config.channel,
+          protocol: config.protocol,
+          tested_at: config.tested_at,
+        }))
+      );
+
+    if (insertError) throw insertError;
+    return data;
+  } catch (error) {
+    console.error('Error in clearAndInsertConfigs:', error);
+    throw error;
+  }
+}
+
+export async function getAllConfigs(): Promise<Config[]> {
+  try {
+    const { data, error } = await supabase
+      .from('configs')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
+    return (data || []) as Config[];
+  } catch (error) {
+    console.error('Error in getAllConfigs:', error);
+    throw error;
+  }
 }
